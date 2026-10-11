@@ -22,7 +22,7 @@ interface PartyMon {
 
 function App() {
   const [activeTab, setActiveTab] = useState('command');
-  const [mapStyle, setMapStyle] = useState<'schematic' | 'leaflet'>('schematic');
+  const [mapStyle, setMapStyle] = useState<'authentic' | 'schematic' | 'leaflet'>('authentic');
   const [wikiMode, setWikiMode] = useState(false);
   const [progressLevel, setProgressLevel] = useState(0);
   const [currentLocation, setCurrentLocation] = useState('pallet');
@@ -235,10 +235,16 @@ function App() {
           <div className="map-view">
             <h2>Interactive World Map</h2>
             <div style={{ marginBottom: 12 }}>
-              <button onClick={() => setMapStyle('schematic')} className={mapStyle === 'schematic' ? 'active' : ''}>Schematic SVG (no OSM)</button>
-              <button onClick={() => setMapStyle('leaflet')} className={mapStyle === 'leaflet' ? 'active' : ''} style={{ marginLeft: 8 }}>Leaflet (OSM tiles)</button>
+              <button onClick={() => setMapStyle('authentic')} className={mapStyle === 'authentic' ? 'active' : ''}>Interactive FireRed maps</button>
+              <button onClick={() => setMapStyle('schematic')} className={mapStyle === 'schematic' ? 'active' : ''} style={{ marginLeft: 8 }}>Route overview</button>
+              <button onClick={() => setMapStyle('leaflet')} className={mapStyle === 'leaflet' ? 'active' : ''} style={{ marginLeft: 8 }}>Experimental OSM</button>
             </div>
-            {mapStyle === 'schematic' ? (
+            {mapStyle === 'authentic' ? (
+              <div className="authentic-map">
+                <div className="map-source-note"><strong>Actual FireRed / LeafGreen game maps</strong><p>Interactive trainer, item and cave navigation provided by the open-source FRLG Ironmon Map. Its markers and progress are managed separately from this companion for now.</p><a href="https://kelseyyoung.github.io/FRLGIronmonMap/" target="_blank" rel="noopener noreferrer">Open full-screen map ↗</a></div>
+                <iframe title="Interactive FireRed and LeafGreen maps" src="https://kelseyyoung.github.io/FRLGIronmonMap/" loading="lazy" referrerPolicy="strict-origin-when-cross-origin" />
+              </div>
+            ) : mapStyle === 'schematic' ? (
               <SchematicMap
                 currentLocation={currentLocation}
                 onSelectLocation={setCurrentLocation}
