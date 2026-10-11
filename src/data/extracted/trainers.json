@@ -1,0 +1,28 @@
+[
+  {
+    "id": "youngsterben",
+    "name": "YoungsterBen",
+    "species": [
+      "RATTATA",
+      "EKANS"
+    ],
+    "levels": [
+      11,
+      11
+    ],
+    "moves": []
+  },
+  {
+    "id": "brock",
+    "name": "Brock",
+    "species": [
+      "GEODUDE",
+      "ONIX"
+    ],
+    "levels": [
+      12,
+      14
+    ],
+    "moves": []
+  }
+]

@@ -1,0 +1,24 @@
+[
+  {
+    "map": "MAP_ROUTE1",
+    "land": [
+      {
+        "species": "SPECIES_PIDGEY",
+        "min": 2,
+        "max": 4
+      }
+    ],
+    "water": []
+  },
+  {
+    "map": "MAP_MT_EMBER",
+    "land": [
+      {
+        "species": "SPECIES_SLUGMA",
+        "min": 24,
+        "max": 30
+      }
+    ],
+    "water": []
+  }
+]
