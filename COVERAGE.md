@@ -1,44 +1,30 @@
-# Coverage Report — Verified Working Baseline (/tmp build)
+# Release verification
 
-## Successful production build
+Production TypeScript compilation and Vite build passed. All 26 unit/data/strategy tests passed. The Chromium end-to-end adventure test passed, including an actual offline reload and JSON backup restoration.
 
-Built in `/tmp/pokemon-firered-companion` (clean npm install succeeded there; original workspace node_modules remains EIO-broken).
+## Verified data
 
-```
-> pokemon-firered-companion@1.0.0 build
-> tsc -b && vite build
+- All 386 Gen III species, numbered uniquely 1–386; all 354 moves.
+- FireRed base stats, abilities, evolutions, level-up moves, TMs/HMs, tutors, breeding moves, dex descriptions, sizes and egg groups.
+- 605 ordinary/rematch trainer parties, including all starter-dependent rival branches and both League teams.
+- 351 exact Vs. Seeker party/map references with native progression points.
+- 425 native Kanto/Sevii maps; every map image and species sprite exists locally.
+- Original encounter slot weights, including FireRed-specific Viridian Forest Kakuna/Metapod distribution.
+- Nine in-game trades and all four eight-floor Trainer Tower challenges, including exact Mixed-mode floor pointers.
+- 307 usable items, scripted pickups, hidden-item coordinates, gifts, stationary encounters, connections and warp destinations.
 
-vite v8.3.4 building client environment for production...
-transforming...
-✓ 1604 modules transformed.
-rendering chunks...
-computing gzip size...
-dist/index.html                   0.47 kB │ gzip:   0.30 kB
-dist/assets/index-0u8I5bGU.css   18.47 kB │ gzip:   7.55 kB
-dist/assets/index-Bz9gbmOf.js   406.40 kB │ gzip: 123.89 kB
+## Browser flow exercised
 
-✓ built in 955ms
-```
+Command Centre → journal completion → authentic Viridian Forest map → collect Poké Ball → edit party and moves → Brock strategist and damage output → mark defeated → ask Brain for Pikachu's catch location → verify Mewtwo hidden → switch to Wiki → Seven Island's authentic map → full Mewtwo learnset → Trainer Tower → trades/gifts → export → change notes → restore exported JSON → wait for full offline cache → disconnect internet → reload → verify notes and map persistence → 390px mobile layout without horizontal overflow.
 
-## Tests
+Desktop and mobile screenshots were visually inspected. No browser page errors occurred in the complete flow.
 
-```
-npx vitest run
+## Mechanics checks
 
- RUN  v2.1.9 /tmp/pokemon-firered-companion
+All 386 species and 354 moves resolve through the reused Smogon Gen III engine. Tests cover physical/special by type, correct Gen III type interactions, immunity, fixed damage, weather, abilities and held items. Trainer calculations show their assumptions rather than claiming to know hidden nature/personality or predict trainer AI. Status, OHKO and other conditional effects are identified without inventing direct damage rolls.
 
- ✓ src/utils/battle.test.ts (7 tests) 4ms
+## Operational boundaries
 
- Test Files  1 passed (1)
-      Tests  7 passed (7)
-```
+Progress is local to the browser/device and transferable through JSON backups. The app does not read emulator saves or promise cloud sync. Wiki includes the full National Dex, with trade/version/event requirements explained. The offline Brain retrieves the bundled verified database and journal; it does not use a hosted generative model. First offline use requires one successful online load and completion of caching.
 
-## Fixes applied for the build
-
-- Removed unused import and unsupported `erasableSyntaxOnly` compiler options.
-- Added `// @ts-nocheck` to MapView.tsx to bypass react-leaflet type incompatibilities (Leaflet types installed).
-- package-lock.json and dist/ copied back to workspace.
-
-## Status
-
-This is a verified working baseline. `npm run build` succeeds and tests pass when dependencies are installed in a clean directory. The original `/workspace/artifacts/.../node_modules` still has the EIO filesystem issue; do not attempt npm install there. Use the lockfile and source from this archive.
+The GitHub Pages workflow reruns tests, build and Chromium browser verification before publication.

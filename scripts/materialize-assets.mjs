@@ -1,0 +1,11 @@
+import {readFile,readdir,mkdir,rm} from 'node:fs/promises';
+import {spawn} from 'node:child_process';
+import {createHash} from 'node:crypto';
+const files=(await readdir('assets')).filter(p=>/^game-\d+\.b64$/.test(p)).sort();
+if(!files.length)throw Error('Native map assets are missing');
+const chunks=await Promise.all(files.map(f=>readFile('assets/'+f,'utf8')));const archive=Buffer.from(chunks.join(''),'base64');const meta=JSON.parse(await readFile('assets/game-manifest.json','utf8'));
+if(archive.length!==meta.bytes||files.length!==meta.parts)throw Error('Asset archive is incomplete');
+if(meta.sha256&&createHash('sha256').update(archive).digest('hex')!==meta.sha256)throw Error('Asset checksum mismatch');
+await rm('public/game',{recursive:true,force:true});await rm('src/data/full',{recursive:true,force:true});
+await mkdir('public',{recursive:true});await new Promise((resolve,reject)=>{const child=spawn('tar',['-xz','-C','.'],{stdio:['pipe','inherit','inherit']});child.on('error',reject);child.on('exit',code=>code===0?resolve():reject(Error('Asset extraction failed')));child.stdin.end(archive)});
+console.log('Native FireRed assets verified and restored.');

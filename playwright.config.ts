@@ -1,0 +1,2 @@
+import {defineConfig} from '@playwright/test';
+export default defineConfig({testDir:'./e2e',timeout:60000,expect:{timeout:15000},fullyParallel:false,workers:1,reporter:[['list']],use:{baseURL:'http://127.0.0.1:4173/pokemon-firered-companion/',viewport:{width:1440,height:1000},trace:'retain-on-failure',screenshot:'only-on-failure'},webServer:{command:'npm run preview -- --host 127.0.0.1',url:'http://127.0.0.1:4173/pokemon-firered-companion/',reuseExistingServer:!process.env.CI},projects:[{name:'chromium',use:{browserName:'chromium'}}]});

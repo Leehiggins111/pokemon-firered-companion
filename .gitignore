@@ -22,3 +22,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Reconstructed native assets; checked archive is tracked in assets/
+public/game/
+src/data/full/
+test-results/
+playwright-report/
+__pycache__/
+*.pyc
