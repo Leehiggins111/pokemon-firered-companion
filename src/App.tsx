@@ -141,14 +141,22 @@ function App() {
   const visibleTrainers = trainers.filter(t => {
     if (!wikiMode && (locations.find(l => l.id === t.location)?.spoilerLevel ?? 0) > progressLevel) return false;
     // Filter rival variants by chosen starter
-    if (t.id.startsWith('rival_') && playerStarter) {
-      if (t.variant?.includes(playerStarter)) return true;
-      return false;
+    if (t.id.startsWith('rival_')) {
+      return playerStarter !== null && (t.variant?.includes(playerStarter) ?? false);
     }
     return true;
   });
 
   const nextMission = missions.find(m => !completedMissions.has(m.id) && (wikiMode || m.spoilerLevel <= progressLevel));
+  const selectedLocation = locations.find(l => l.id === currentLocation);
+  const locationTrainers = visibleTrainers.filter(t => t.location === selectedLocation?.name);
+  const locationMissions = visibleMissions.filter(m => m.location === selectedLocation?.name);
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const searchResults = normalizedSearch ? [
+    ...locations.filter(l => (wikiMode || l.spoilerLevel <= progressLevel) && [l.name, l.description, ...l.items, ...l.encounters].some(v => v.toLowerCase().includes(normalizedSearch))).map(l => ({ key: `location-${l.id}`, label: l.name, detail: `${l.encounters.length} encounters · ${l.items.length} items`, tab: 'map', location: l.id })),
+    ...visibleTrainers.filter(t => [t.name, t.class, t.location, ...t.team.map(p => p.species)].some(v => v.toLowerCase().includes(normalizedSearch))).map(t => ({ key: `trainer-${t.id}`, label: t.name, detail: `${t.location} · ${t.team.map(p => `${p.species} Lv.${p.level}`).join(', ')}`, tab: 'battle', location: locations.find(l => l.name === t.location)?.id })),
+    ...visibleMissions.filter(m => [m.title, m.location, ...m.steps, ...m.rewards].some(v => v.toLowerCase().includes(normalizedSearch))).map(m => ({ key: `mission-${m.id}`, label: m.title, detail: m.location, tab: 'missions', location: locations.find(l => l.name === m.location)?.id }))
+  ] : [];
 
   const toggleMission = (id: string) => {
     setCompletedMissions(prev => {
@@ -212,15 +220,12 @@ function App() {
               <div className="card">
                 <h3>Pokémon Brain (search)</h3>
                 <input placeholder="Search locations, trainers, items..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-                {searchQuery && (
-                  <ul style={{ fontSize: '0.85rem', maxHeight: 120, overflow: 'auto' }}>
-                    {locations.filter(l => l.name.toLowerCase().includes(searchQuery.toLowerCase()) || l.description.toLowerCase().includes(searchQuery.toLowerCase())).map(l => (
-                      <li key={l.id}>{l.name} — {l.description.slice(0, 60)}...</li>
-                    ))}
-                    {trainers.filter(t => t.name.toLowerCase().includes(searchQuery.toLowerCase()) || t.location.toLowerCase().includes(searchQuery.toLowerCase())).map(t => (
-                      <li key={t.id}>{t.name} ({t.class}) at {t.location}</li>
-                    ))}
-                  </ul>
+                {normalizedSearch && (
+                  <div className="brain-results" aria-live="polite">
+                    <p>{searchResults.length} results in the current early-game dataset</p>
+                    {searchResults.length === 0 && <p>No matches. The full FireRed database has not been imported yet.</p>}
+                    {searchResults.map(result => <button key={result.key} className="brain-result" onClick={() => { if (result.location) setCurrentLocation(result.location); setActiveTab(result.tab); }}><strong>{result.label}</strong><span>{result.detail}</span></button>)}
+                  </div>
                 )}
               </div>
             </div>
@@ -251,7 +256,13 @@ function App() {
             <div className="location-detail card">
               <h3>{locations.find(l => l.id === currentLocation)?.name}</h3>
               <p>{locations.find(l => l.id === currentLocation)?.description}</p>
-              <p>Connections: {locations.find(l => l.id === currentLocation)?.connections.join(', ')}</p>
+              <p>Connections: {selectedLocation?.connections.map(id => locations.find(l => l.id === id)?.name || id).join(' · ')}</p>
+              <div className="location-intel">
+                <section><h4>Wild encounters ({selectedLocation?.encounters.length ?? 0})</h4>{selectedLocation?.encounters.length ? <ul>{selectedLocation.encounters.map(e => <li key={e}>{e}</li>)}</ul> : <p>No wild encounters listed.</p>}</section>
+                <section><h4>Items ({selectedLocation?.items.length ?? 0})</h4>{selectedLocation?.items.length ? <ul>{selectedLocation.items.map((item, i) => <li key={i}>{item}</li>)}</ul> : <p>No items listed.</p>}</section>
+                <section><h4>Trainers ({locationTrainers.length})</h4>{locationTrainers.length ? locationTrainers.map(t => <button key={t.id} className="intel-action" onClick={() => setActiveTab('battle')}>{t.name} · {t.team.map(p => `${p.species} Lv.${p.level}`).join(', ')} {defeatedTrainers.has(t.id) ? '✓' : '→'}</button>) : <p>No trainers listed. Choose your starter to reveal rival variants.</p>}</section>
+                <section><h4>Objectives ({locationMissions.length})</h4>{locationMissions.length ? locationMissions.map(m => <label key={m.id} className="intel-objective"><input type="checkbox" checked={completedMissions.has(m.id)} onChange={() => toggleMission(m.id)} /> {m.title}</label>) : <p>No objectives listed.</p>}</section>
+              </div>
             </div>
           </div>
         )}
